@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model default_hours {
+  id         Int     @id @default(autoincrement())
+  startHour  String? @db.VarChar(45)
+  startMin   String? @db.VarChar(45)
+  endHour    String? @db.VarChar(45)
+  endMin     String? @db.VarChar(45)
+  type_shift String? @db.VarChar(45)
+}
+
+model hours_worked_days {
+  id            Int          @id @default(autoincrement())
+  worked_day_id Int?
+  hours         Int?
+  type_hours_id Int?
+  type_hours    type_hours?  @relation(fields: [type_hours_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_type_hours_hours_worked_days")
+  worked_days   worked_days? @relation(fields: [worked_day_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_worked_days_hours_worked_days")
+
+  @@index([type_hours_id], map: "fk_type_hours_hours_worked_days_idx")
+  @@index([worked_day_id], map: "fk_worked_days_hours_worked_days_idx")
+}
+
+model profile_worked_days {
+  id            Int          @id @default(autoincrement())
+  worked_day_id Int?
+  profile_id    Int?
+  profiles      profiles?    @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_profiles_profile_worked_days")
+  worked_days   worked_days? @relation(fields: [worked_day_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_worked_days_profile_worked_days")
+
+  @@index([profile_id], map: "fk_profiles_idx")
+  @@index([worked_day_id], map: "fk_worked_days_idx")
+}
+
+model profiles {
+  id                  Int                   @id @default(autoincrement())
+  name                String?               @db.VarChar(100)
+  profile_worked_days profile_worked_days[]
+}
+
+model type_hours {
+  id                Int                 @id @default(autoincrement())
+  price             Decimal?            @db.Decimal(5, 2)
+  type              String?             @db.VarChar(45)
+  hours_worked_days hours_worked_days[]
+}
+
+model worked_days {
+  id                  Int                   @id @default(autoincrement())
+  date                DateTime?             @db.Date
+  start_hour          String?               @db.VarChar(45)
+  start_minute        String?               @db.VarChar(45)
+  end_hour            String?               @db.VarChar(45)
+  end_minute          String?               @db.VarChar(45)
+  hours_worked_days   hours_worked_days[]
+  profile_worked_days profile_worked_days[]
+}
