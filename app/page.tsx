@@ -1,11 +1,11 @@
 "use client"
-import { Key, useEffect, useMemo, useState } from "react";
+import { Key, ReactNode, useEffect, useMemo, useState } from "react";
 import DatePicker, { DateObject } from "react-multi-date-picker"
 import { Calendar } from "react-multi-date-picker"
 import { Time } from "@internationalized/date";
 import dayjs, { Dayjs } from "dayjs";
 
-import { Flex, Radio, TimePicker, type TimePickerProps } from 'antd';
+import { Flex, Radio, Select, TimePicker, type TimePickerProps } from 'antd';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 
@@ -14,7 +14,8 @@ interface DateTime {
   startHour: string,
   startMin: string,
   endHour: string,
-  endMin: string
+  endMin: string,
+  break: boolean
 }
 
 interface DefaultHour {
@@ -31,20 +32,31 @@ interface Profile {
   name: string,
 }
 
+interface OptionsGroup {
+  label: ReactNode,
+  title: string,
+  options: Options[]
+}
+
 interface Options {
-  value: number
+  value: string,
   label: string,
 }
 
 const format = 'HH:mm';
+
+const defaultHourObject = { id: 1, startHour: "04", startMin: "00", endHour: "12", endMin: "00", type_shift: "morning shift" };
+const defaultProfileId = 1;
 
 export default function Home() {
   /** States */
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [dates, setDates] = useState<DateTime[]>([])
   const [editingIndexes, setEditingIndexes] = useState<number[]>([]);
-  const [selectedTabProfile, setSelectedTabProfile] = useState<number>(2);
-  const [defaultHours, setDefaultHours] = useState([]);
+  const [selectedTabProfile, setSelectedTabProfile] = useState<number>(defaultProfileId);
+  const [defaultHours, setDefaultHours] = useState<DefaultHour[]>([]);
+  const [defaultHoursGroup, setDefaultHoursGroup] = useState<OptionsGroup[]>([]);
+  const [selectedDefaultHour, setSelectedDefaultHour] = useState<DefaultHour>(defaultHourObject);
 
 
   const handleSelectedTabProfile = (e: CheckboxChangeEvent) => {
@@ -70,9 +82,12 @@ export default function Home() {
 
     //Adding default start/end times to new dates and filling the array with both new and old dates
     const newDates = [...updatedDates, ...newFilteredDates.map((newFilteredDate) => {
-      return { date: newFilteredDate, startHour: "04", startMin: "00", endHour: "12", endMin: "30" }
+      const newSelectedDate = {date: newFilteredDate, startHour: selectedDefaultHour?.startHour, startMin: selectedDefaultHour?.startMin, endHour: selectedDefaultHour?.endHour, endMin: selectedDefaultHour?.endMin, break: true };
+
+      return newSelectedDate
     })]
 
+    
     //Set dates array
     setDates(newDates)
 
@@ -96,25 +111,31 @@ export default function Home() {
         //If focused and clicked dates do match, it's created
         console.log("se ha seleccionado " + dateClickedFormat)
 
+
         method = 'POST';
       }
 
 
+      if (method) {
+        const response = await fetch('/api/profileWorkedDays', {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          //We will use the default hours when creating a new date
+          body: JSON.stringify({ profile: selectedTabProfile, date: dateClicked.format("YYYY-MM-DD"), startHour: selectedDefaultHour.startHour, startMin: selectedDefaultHour.startMin, endHour: selectedDefaultHour.endHour, endMin: selectedDefaultHour.endMin }),
+        });
 
-      const response = await fetch('/api/profileWorkedDays', {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ profile: selectedTabProfile, date: dateClicked.format("DD/MM/YYYY") }),
-      });
+        if (!response.ok) {
+          throw new Error('Failed to create profile');
+        }
 
-      if (!response.ok) {
-        throw new Error('Failed to create profile');
+        const newProfile = await response.json();
+        console.log('Profile created:', newProfile);
       }
 
-      const newProfile = await response.json();
-      console.log('Profile created:', newProfile);
+
+
     } catch (error) {
       console.error(error);
     }
@@ -152,6 +173,13 @@ export default function Home() {
     setEditingIndexes(newIndexes)
   }
 
+  const handleDefaultHourChange = (value: string) => {
+    //    console.log(`selected ${value}`);
+
+    const newSelectedDefaultHour = defaultHours.find((defaultHour) => defaultHour.id == parseInt(value))
+
+    if (newSelectedDefaultHour) setSelectedDefaultHour(newSelectedDefaultHour);
+  }
 
   useEffect(() => {
     const fetchTypeHours = async () => {
@@ -178,8 +206,38 @@ export default function Home() {
       try {
         const res = await fetch('/api/defaultHours');
         const data = await res.json();
-        setDefaultHours(data)
-        console.log(data)
+
+
+        //Setting raw state data
+        setDefaultHours(data);
+
+
+        //Setting select options
+        const groupedShifts = data.reduce((acc: OptionsGroup[], item: DefaultHour) => {
+
+          const existingShift = acc.find((shift: any) => shift.title === item.type_shift);
+
+          if (existingShift) {
+
+            existingShift.options.push({ value: String(item.id), label: `${item.startHour}:${item.startMin} - ${item.endHour}:${item.endMin}` });
+          } else {
+
+            acc.push({
+              label: <span>{item.type_shift}</span>,
+              title: item.type_shift,
+              options: [{ value: String(item.id), label: `${item.startHour}:${item.startMin} - ${item.endHour}:${item.endMin}` }]
+            });
+          }
+
+          return acc;
+        }, []);
+
+        setDefaultHoursGroup(groupedShifts)
+
+        //Setting default hour
+        const newDefaultHour = defaultHours.find((defaultHour: DefaultHour) => defaultHour.id == (defaultHourObject.id));
+        if (newDefaultHour) setSelectedDefaultHour(newDefaultHour)
+
       } catch (error) {
         console.error("Error: no va", error);
       }
@@ -206,7 +264,6 @@ export default function Home() {
           }
         })
 
-        console.log(newProfileWorkedDays)
         setDates(newProfileWorkedDays)
 
       } catch (error) {
@@ -221,7 +278,6 @@ export default function Home() {
   }, [selectedTabProfile]);
 
 
-
   return (
 
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
@@ -233,12 +289,15 @@ export default function Home() {
         <div>
 
           <Flex vertical gap="middle">
-            <Radio.Group block options={profiles.map((profile) => { return { label: profile.name, value: profile.id } })} optionType="button" onChange={handleSelectedTabProfile}/>
+            <Radio.Group block options={profiles.map((profile) => { return { label: profile.name, value: profile.id } })} optionType="button" onChange={handleSelectedTabProfile} value={selectedTabProfile} />
           </Flex>
 
 
         </div>
-
+        <Select
+          style={{ width: 200 }}
+          onChange={handleDefaultHourChange}
+          options={defaultHoursGroup} defaultValue={String(defaultHourObject.id)} />
 
         <div className="flex gap-5">
           {/** Calendario */}

@@ -59,6 +59,7 @@ model worked_days {
   start_minute        String?               @db.VarChar(45)
   end_hour            String?               @db.VarChar(45)
   end_minute          String?               @db.VarChar(45)
+  break               Int?                  @db.TinyInt
   hours_worked_days   hours_worked_days[]
   profile_worked_days profile_worked_days[]
 }

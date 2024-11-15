@@ -2,6 +2,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { parseDateTime } from "@internationalized/date";
 const prisma = new PrismaClient();
 
 
@@ -31,10 +32,29 @@ export async function POST(req: Request) {
     const data = await req.json();
     console.log(data);
 
+    const diffMinutes = (parseInt(data.endHour) * 60 + parseInt(data.endMin)) - (parseInt(data.startHour) * 60 + parseInt(data.startMin));
+    const diffHours = diffMinutes/60;
+    console.log(diffHours)
     // Insert a new worked day for a profile
-    /*const newProfileWorkedDay = await prisma.profile_worked_days.create({
-
-    })*/
+    const newProfileWorkedDay = await prisma.profile_worked_days.create({
+      data: {
+        worked_days: {
+          create: {
+            date: new Date(data.date),
+            start_hour: data.startHour,
+            start_minute: data.startMin,
+            end_hour: data.endHour,
+            end_minute: data.endMin
+            
+          }
+        },
+        profiles: {
+          connect: {
+            id: data.profile 
+          }
+        }
+      }
+    })
 
     // Respond with the created profile
     return NextResponse.json("newProfileWorkedDay");
