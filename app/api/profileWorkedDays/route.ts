@@ -163,7 +163,6 @@ export async function POST(req: Request) {
     /* Calculate the actual worked hours
      If there's break in the shift, 30 minutes will be substracted from the shift*/
     const diffHours = calculateDifferenceHours(data);
-    console.log(diffHours);
 
     const workedDayId = newProfileWorkedDay.worked_day_id;
     /* Calculate different type of hours for each shift */
@@ -294,7 +293,6 @@ export async function PUT(req: Request) {
       data: newTypeHours,
     });
 
-    console.log(newTypeHours);
     // Response
     return NextResponse.json(updatedProfileWorkedDay);
   } catch (error) {
@@ -312,7 +310,6 @@ export async function DELETE(req: Request) {
   try {
     // Get request data
     const data = await req.json();
-    console.log(data.date);
 
     // Check if profile id and date both exist
     if (!data.profile || !data.date) {

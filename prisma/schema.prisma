@@ -42,6 +42,7 @@ model profile_worked_days {
 model profiles {
   id                  Int                   @id @default(autoincrement())
   name                String?               @db.VarChar(100)
+  monthly_salary      monthly_salary[]
   profile_worked_days profile_worked_days[]
 }
 
@@ -63,4 +64,17 @@ model worked_days {
   sunday              Int?                  @db.TinyInt
   hours_worked_days   hours_worked_days[]
   profile_worked_days profile_worked_days[]
+}
+
+model monthly_salary {
+  id           Int       @id @default(autoincrement())
+  profile_id   Int?
+  base_salary  Float?    @db.Float
+  month        Int?
+  month_tips   Float?    @db.Float
+  month_salary Float?    @db.Float
+  total_hours  Float?    @db.Float
+  profiles     profiles? @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_monthly_salary_profiles")
+
+  @@index([profile_id], map: "fk_monthly_salary_profiles_idx")
 }

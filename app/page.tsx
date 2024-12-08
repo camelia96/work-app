@@ -20,6 +20,23 @@ function prismaFormatDate(date: DateObject) {
   const dateUTC = new Date(Date.UTC(date.year, date.month.number - 1, date.day, 0, 0, 0, 0));
   return dateUTC.toISOString()
 }
+
+async function hoursToSalary(currentMonth: DateObject, selectedTabProfile: number) {
+  // Get all existing hours from clicked date month
+  const res = await fetch(`/api/hoursWorkedDays?month=${currentMonth.month.number}&profile=${selectedTabProfile}`, {
+    method: "GET",
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+
+  if (!res.ok) {
+    throw new Error('Failed to show errors');
+  }
+  const hoursSalary = await res.json();
+
+  return hoursSalary;
+}
 export default function Home() {
   /** States */
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -33,6 +50,8 @@ export default function Home() {
   const [breakExists, setBreakExists] = useState(true);
   const [sunday, setSunday] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new DateObject());
+  const [workedHours, setWorkedHours] = useState<number>(0);
+  const [baseSalary, setBaseSalary] = useState<number>(0);
 
   //console.log(currentMonth.month)
 
@@ -40,6 +59,7 @@ export default function Home() {
     setSelectedTabProfile(e.target.value);
   };
 
+  
 
   /** Selecting/deselecting a calendar date -> Database dates setting (onFocus event) */
   const handleClickedDate = async (dateFocused: DateObject, dateClicked: DateObject) => {
@@ -70,6 +90,7 @@ export default function Home() {
       }
 
       if (method) {
+        // We create/delete worked day
         const response = await fetch('/api/profileWorkedDays', {
           method: method,
           headers: {
@@ -85,6 +106,13 @@ export default function Home() {
 
         const newProfile = await response.json();
         console.log('Profile created:', newProfile);
+
+        // Update the month salary
+        const hoursSalary = await hoursToSalary(currentMonth, selectedTabProfile);
+
+        setWorkedHours(hoursSalary.workedHours)
+        setBaseSalary(hoursSalary.baseSalary)
+
       }
 
 
@@ -128,6 +156,8 @@ export default function Home() {
   /* Changing calendar month display */
   const handleMonthCalendarChange = (month: DateObject) => {
     setCurrentMonth(new DateObject(month))
+
+    console.log(month.month)
   }
   const handleEditingIndex = (index: number) => {
     setEditingIndexes([...editingIndexes, index])
@@ -174,7 +204,7 @@ export default function Home() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({profile:selectedTabProfile, data: updatedDate, date: prismaFormatDate(updatedDate.date)} ),
+      body: JSON.stringify({ profile: selectedTabProfile, data: updatedDate, date: prismaFormatDate(updatedDate.date) }),
     });
 
     if (!response.ok) {
@@ -199,7 +229,7 @@ export default function Home() {
       try {
         const res = await fetch('/api/typeHours');
         const data = await res.json();
-        console.log(data)
+
       } catch (error) {
         console.error("Error:", error);
       }
@@ -261,8 +291,7 @@ export default function Home() {
 
         const res = await fetch('/api/profileWorkedDays?profile=' + selectedTabProfile);
         const data = await res.json();
-
-
+        console.log(data)
         const newProfileWorkedDays = data.map((profileWorkedDay: any) => {
           return {
             date: new DateObject({
@@ -284,12 +313,24 @@ export default function Home() {
         console.error("Error: no vaaa", error);
       }
     }
+
+
+    // Update the month salary
+    const fetchHoursSalary = async() => {
+      const hoursSalary = await hoursToSalary(currentMonth, selectedTabProfile);
+
+      setWorkedHours(hoursSalary.workedHours)
+      setBaseSalary(hoursSalary.baseSalary)
+    } 
+
+
     fetchTypeHours();
     fetchProfiles();
     fetchProfileWorkedDays();
     fetchDefaultHours();
+    fetchHoursSalary();
 
-  }, [selectedTabProfile]);
+  }, [selectedTabProfile, currentMonth]);
 
 
   return (
@@ -329,13 +370,17 @@ export default function Home() {
             onMonthChange={handleMonthCalendarChange} />
 
 
+          <div>
+            Worked hours: {workedHours}
+          </div>
+          <div>Salary: {baseSalary}</div>
         </div>
         {/*<Button className="bg-gradient-to-tr from-pink-500 to-yellow-500 text-white shadow-lg" onPress={handleSubmit}>Save changes</Button>*/}
         <div className="flex flex-col">
 
           {/** Lista con días trabajados */}
           <p className="font-bold">Días trabajados</p>
-          {dates.map((date, index) => editingIndexes.includes(index) ?
+          {dates.filter(date => date.date.month.number === currentMonth.month.number).map((date, index) => editingIndexes.includes(index) ?
             (<div className="flex gap-5" key={index}>
               <p>{date.date.format()}</p>
               <TimePicker value={dayjs(`${date.startHour}:${date.startMin}`, formatHour)} changeOnScroll format={formatHour} onChange={(date, dateString) => handleStartTimeChange(date, dateString, index)} />
