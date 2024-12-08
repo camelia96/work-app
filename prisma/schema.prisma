@@ -19,7 +19,7 @@ model default_hours {
 model hours_worked_days {
   id            Int          @id @default(autoincrement())
   worked_day_id Int?
-  hours         Int?
+  hours         Float?
   type_hours_id Int?
   type_hours    type_hours?  @relation(fields: [type_hours_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_type_hours_hours_worked_days")
   worked_days   worked_days? @relation(fields: [worked_day_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_worked_days_hours_worked_days")
@@ -60,6 +60,7 @@ model worked_days {
   end_hour            String?               @db.VarChar(45)
   end_minute          String?               @db.VarChar(45)
   break               Int?                  @db.TinyInt
+  sunday              Int?                  @db.TinyInt
   hours_worked_days   hours_worked_days[]
   profile_worked_days profile_worked_days[]
 }
