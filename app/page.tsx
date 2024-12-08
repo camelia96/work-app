@@ -76,7 +76,7 @@ export default function Home() {
             'Content-Type': 'application/json',
           },
           //We will use the default hours when creating a new date
-          body: JSON.stringify({ profile: selectedTabProfile, date: dateClicked.format("YYYY-MM-DD"), startHour: selectedDefaultHour.startHour, startMin: selectedDefaultHour.startMin, endHour: selectedDefaultHour.endHour, endMin: selectedDefaultHour.endMin, break: breakExists, sunday: isSunday }),
+          body: JSON.stringify({ profile: selectedTabProfile, date: prismaFormatDate(dateClicked), startHour: selectedDefaultHour.startHour, startMin: selectedDefaultHour.startMin, endHour: selectedDefaultHour.endHour, endMin: selectedDefaultHour.endMin, break: breakExists, sunday: isSunday }),
         });
 
         if (!response.ok) {
@@ -176,7 +176,6 @@ export default function Home() {
       },
       body: JSON.stringify({profile:selectedTabProfile, data: updatedDate, date: prismaFormatDate(updatedDate.date)} ),
     });
-console.log(dates)
 
     if (!response.ok) {
       throw new Error('Failed to create profile');

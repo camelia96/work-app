@@ -228,7 +228,6 @@ export async function PUT(req: Request) {
     }
 
     // Update record
-    console.log(workedDayToUpdate);
     const updatedProfileWorkedDay = await prisma.worked_days.update({
       where: {
         id: workedDayToUpdate?.worked_day_id, // Suponiendo que el ID del recurso se pasa en `data.id`
@@ -259,9 +258,6 @@ export async function PUT(req: Request) {
       );
     }
 
-    console.log(updatedProfileWorkedDay);
-    console.log();
-
     const newDateTimeObject = {
       date: new DateObject(
         (updatedProfileWorkedDay.date.getFullYear(),
@@ -289,7 +285,7 @@ export async function PUT(req: Request) {
     //Delete old records from hours_worked_days for selected worked_day
     const oldHoursWorkedDays = await prisma.hours_worked_days.deleteMany({
       where: {
-        worked_day_id: updatedProfileWorkedDay.id
+        worked_day_id: updatedProfileWorkedDay.id,
       },
     });
 
@@ -298,7 +294,7 @@ export async function PUT(req: Request) {
       data: newTypeHours,
     });
 
-    console.log(newTypeHours)
+    console.log(newTypeHours);
     // Response
     return NextResponse.json(updatedProfileWorkedDay);
   } catch (error) {
@@ -314,13 +310,56 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    // Get request data
     const data = await req.json();
-    console.log(data);
-    // Insert a new worked day for a profile
-    /*const newProfileWorkedDay = await prisma.profile_worked_days.create({
+    console.log(data.date);
 
-    })*/
+    // Check if profile id and date both exist
+    if (!data.profile || !data.date) {
+      return NextResponse.json(
+        { error: "ID and/or date is required to update the data" },
+        { status: 400 }
+      );
+    }
 
+    const workedDayToDelete = await prisma.profile_worked_days.findFirst({
+      where: {
+        worked_days: {
+          date: data.date,
+        },
+        profile_id: data.profile,
+      },
+      select: {
+        worked_day_id: true,
+      },
+    });
+
+    if (!workedDayToDelete?.worked_day_id) {
+      return NextResponse.json(
+        { error: "Failed to create profile" },
+        { status: 500 }
+      );
+    }
+
+    const transaction = await prisma.$transaction([
+      prisma.profile_worked_days.deleteMany({
+        where: {
+          worked_day_id: workedDayToDelete.worked_day_id,
+        },
+      }),
+      prisma.hours_worked_days.deleteMany({
+        where: {
+          worked_day_id: workedDayToDelete.worked_day_id,
+        },
+      }),
+      prisma.worked_days.delete({
+        where: {
+          id: workedDayToDelete.worked_day_id,
+        },
+      }),
+    ]);
+
+    console.log(transaction)
     // Respond with the created profile
     return NextResponse.json("newProfileWorkedDay");
   } catch (error) {
