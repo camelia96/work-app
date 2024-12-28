@@ -56,7 +56,7 @@ Visit http://localhost:5173 in your browser.
 ## Usage
 - Input your regular hours, Sunday hours, and morning hours in the provided fields.
 - Enter your estimated tips for the year.
-- 
+
 The app will calculate your monthly salary based on the inputs.
 
 
