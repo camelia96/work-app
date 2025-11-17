@@ -5,17 +5,54 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --green: #009688;
+  --green-hover: #4db6ac;
+  --blue: #3b82f6;
+  --blue-hover: #d9eaff;
 }
 
-@media (prefers-color-scheme: dark) {
+
+
+/*@media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+}*/
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-figtree);
 }
+
+/* antdesign checkbox */
+.holiday-checkbox:hover .ant-checkbox-inner {
+  border-color: var(--green)!important
+}
+
+
+.holiday-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: var(--green);
+  border-color: var(--green);
+}
+
+.holiday-checkbox:hover .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: var(--green-hover)!important;
+  border-color: var(--green-hover)!important;
+}
+
+/* Calendar responsive *//*
+.rmdp-wrapper{
+  @apply w-max sm:w-full !important
+}
+.rmdp-calendar {
+  @apply w-full !important;
+}*/
+.rmdp-top-class {
+  @apply w-max
+}
+.rmdp-full-year {
+  @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3 !important
+}
+

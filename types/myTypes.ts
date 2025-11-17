@@ -9,6 +9,7 @@ export interface DateTime {
   endMin: string;
   break: boolean;
   sunday: boolean;
+  holiday: boolean;
 }
 
 export interface DefaultHour {

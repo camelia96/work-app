@@ -56,12 +56,13 @@ model type_hours {
 model worked_days {
   id                  Int                   @id @default(autoincrement())
   date                DateTime?             @db.Date
-  start_hour          String?               @db.VarChar(45)
-  start_minute        String?               @db.VarChar(45)
-  end_hour            String?               @db.VarChar(45)
-  end_minute          String?               @db.VarChar(45)
+  startHour           String?               @db.VarChar(45)
+  startMin            String?               @db.VarChar(45)
+  endHour             String?               @db.VarChar(45)
+  endMin              String?               @db.VarChar(45)
   break               Int?                  @db.TinyInt
   sunday              Int?                  @db.TinyInt
+  holiday             Int?                  @db.TinyInt
   hours_worked_days   hours_worked_days[]
   profile_worked_days profile_worked_days[]
 }

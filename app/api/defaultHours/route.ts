@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   try {
 
     const defaultHours = await prisma.default_hours.findMany();
-    console.log(defaultHours)
+
     return NextResponse.json(defaultHours);
   } catch (error) {
     return NextResponse.json({ error: "Error" });

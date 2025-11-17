@@ -13,29 +13,34 @@ export async function GET(req: Request) {
 
     let whereClause = {};
 
-    const selectedMonth = searchParams.get("month");
     const selectedProfile = searchParams.get("profile");
-    const currentYear = new Date().getFullYear();
+    const firstDayCurrentPayroll = searchParams.get("firstDay");
+    const lastDayCurrentPayroll = searchParams.get("lastDay");
 
     if (
       !(
-        selectedMonth &&
-        selectedMonth != undefined &&
         selectedProfile &&
-        selectedProfile != undefined
+        selectedProfile != undefined &&
+        firstDayCurrentPayroll &&
+        firstDayCurrentPayroll != undefined &&
+        lastDayCurrentPayroll &&
+        lastDayCurrentPayroll != undefined
       )
     ) {
       return NextResponse.json({ error: "Error" });
     }
 
-    const parsedMonth = parseInt(selectedMonth);
+    const parsedFirstDayCurrentPayroll = new Date(firstDayCurrentPayroll);
+    const parsedLastDayCurrentPayroll = new Date(lastDayCurrentPayroll);
+
 
     whereClause = {
-      gte: new Date(`${currentYear}-${parsedMonth}-01`), // Last day of previous month
-      lt:
-        parsedMonth == 12
-          ? new Date(`${currentYear + 1}-01-01`)
-          : new Date(`${currentYear}-${parsedMonth + 1}-01`), // First day of next month
+      gte: parsedFirstDayCurrentPayroll,
+      /*new Date(`${parsedYear}-${parsedMonth}-01`), // Last day of previous month*/
+      lt: parsedLastDayCurrentPayroll,
+      /*parsedMonth == 12
+          ? new Date(`${parsedYear + 1}-01-01`)
+          : new Date(`${parsedYear}-${parsedMonth + 1}-01`), // First day of next month*/
     };
 
     //Get profile worked days
@@ -51,8 +56,6 @@ export async function GET(req: Request) {
         worked_days: true,
       },
     });
-    console.log("AQUI");
-    console.log(profileWorkedDays);
 
     const profileWorkedIds = profileWorkedDays.map(
       (element) => element.worked_day_id
@@ -78,8 +81,6 @@ export async function GET(req: Request) {
       },
     });
 
-    console.log(hoursWorkedDays);
-
     /* Calculate total worked hours */
     const totalWorkedHours = hoursWorkedDays.reduce((acc, current) => {
       const validHour = current.hours != null ? current.hours : 0;
@@ -87,7 +88,23 @@ export async function GET(req: Request) {
       return acc + validHour;
     }, 0);
 
-    console.log(totalWorkedHours);
+    /* Calculate total MORNING worked hours */
+    const totalMorningWorkedHours = hoursWorkedDays
+      .filter((hour) => hour.type_hours?.type?.includes("morning"))
+      .reduce((acc, current) => {
+        const validHour = current.hours != null ? current.hours : 0;
+
+        return acc + validHour;
+      }, 0);
+
+    /* Calculate total SUNDAYS worked hours */
+    const totalSundaysWorkedHours = hoursWorkedDays
+      .filter((hour) => hour.type_hours?.type?.includes("sunday"))
+      .reduce((acc, current) => {
+        const validHour = current.hours != null ? current.hours : 0;
+
+        return acc + validHour;
+      }, 0);
 
     /* Calculate base salary */
     const baseSalary = hoursWorkedDays.reduce((acc, current) => {
@@ -106,9 +123,12 @@ export async function GET(req: Request) {
       return acc.add(new Decimal(validHour).mul(validPrice));
     }, new Decimal(0));
 
-    console.log(baseSalary)
-
-    return NextResponse.json({workedHours:totalWorkedHours, baseSalary: baseSalary});
+    return NextResponse.json({
+      workedHours: totalWorkedHours,
+      baseSalary: baseSalary,
+      morningWorkedHours: totalMorningWorkedHours,
+      sundaysWorkedHours: totalSundaysWorkedHours,
+    });
   } catch (error) {
     return NextResponse.json({ error: "Error" });
   }
@@ -154,7 +174,7 @@ export async function DELETE(req: Request) {
   try {
     // Get request data
     const data = await req.json();
-    console.log(data.date);
+
     // Respond with the created profile
     return NextResponse.json("newProfileWorkedDay");
   } catch (error) {

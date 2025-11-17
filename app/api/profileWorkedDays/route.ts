@@ -100,17 +100,37 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
 
     const profileId = searchParams.get("profile");
+    const firstDayCurrentPayroll = searchParams.get("firstDay");
+    const lastDayCurrentPayroll = searchParams.get("lastDay");
 
-    const parseProfileId = profileId ? parseInt(profileId) : null;
+    if (!profileId || !firstDayCurrentPayroll || !lastDayCurrentPayroll) {
+      return NextResponse.json({ error: "Error 1" });
+    }
 
+    const parsedFirstDayCurrentPayroll = new Date(firstDayCurrentPayroll);
+    const parsedLastDayCurrentPayroll = new Date(lastDayCurrentPayroll);
+
+    console.log(parsedFirstDayCurrentPayroll);
     const profileWorkedDays = await prisma.profile_worked_days.findMany({
       include: { worked_days: true },
-      where: { profile_id: parseProfileId },
+      where: {
+        profile_id: parseInt(profileId),
+        worked_days: {
+          date: {
+            // First day of previous month
+            gte: parsedFirstDayCurrentPayroll,
+            lt: parsedLastDayCurrentPayroll,
+          },
+        },
+      },
     });
 
+    console.log(firstDayCurrentPayroll);
+    console.log(lastDayCurrentPayroll);
     return NextResponse.json(profileWorkedDays);
   } catch (error) {
-    return NextResponse.json({ error: "Error" });
+    console.log(error);
+    return NextResponse.json({ error: "Error2" });
   }
 }
 
@@ -137,12 +157,13 @@ export async function POST(req: Request) {
         worked_days: {
           create: {
             date: new Date(data.date),
-            start_hour: data.startHour,
-            start_minute: data.startMin,
-            end_hour: data.endHour,
-            end_minute: data.endMin,
+            startHour: data.startHour,
+            startMin: data.startMin,
+            endHour: data.endHour,
+            endMin: data.endMin,
             break: data.break ? 1 : 0,
             sunday: data.sunday ? 1 : 0,
+            holiday: data.holiday ? 1 : 0,
           },
         },
         profiles: {
@@ -165,8 +186,8 @@ export async function POST(req: Request) {
     const diffHours = calculateDifferenceHours(data);
 
     const workedDayId = newProfileWorkedDay.worked_day_id;
-    /* Calculate different type of hours for each shift */
 
+    /* Calculate different type of hours for each shift */
     if (!workedDayId) {
       return NextResponse.json(
         { error: "There needs to be a worked day id" },
@@ -182,8 +203,21 @@ export async function POST(req: Request) {
       data: differentWorkedHours,
     });
 
+    const newWorkedDayId = newProfileWorkedDay.worked_days?.id;
+    if (!newWorkedDayId)
+      return NextResponse.json(
+        { error: "Worked day not found/created" },
+        { status: 400 }
+      );
+
+    const newWorkedDay = await prisma.worked_days.findUnique({
+      where: {
+        id: newWorkedDayId,
+      },
+    });
+
     // Respond with the created profile
-    return NextResponse.json("newProfileWorkedDay");
+    return NextResponse.json(newWorkedDay);
   } catch (error) {
     console.error("Error creating profile:", error);
     return NextResponse.json(
@@ -198,6 +232,7 @@ export async function PUT(req: Request) {
   try {
     // Get request data
     const data = await req.json();
+    console.log(data);
 
     // Check if profile id and date both exist
     if (!data.profile || !data.date) {
@@ -233,23 +268,23 @@ export async function PUT(req: Request) {
       },
       data: {
         date: new Date(data.date),
-        start_hour: data.data.startHour,
-        start_minute: data.data.startMin,
-        end_hour: data.data.endHour,
-        end_minute: data.data.endMin,
-        break: data.data.break ? 1 : 0,
-        sunday: data.data.sunday,
+        startHour: data.startHour,
+        startMin: data.startMin,
+        endHour: data.endHour,
+        endMin: data.endMin,
+        break: data.break ? 1 : 0,
+        sunday: data.sunday ? 1 : 0,
+        holiday: data.holiday ? 1 : 0,
       },
     });
 
     if (
       !updatedProfileWorkedDay ||
-      !updatedProfileWorkedDay ||
       !updatedProfileWorkedDay.date ||
-      updatedProfileWorkedDay.start_hour == null ||
-      updatedProfileWorkedDay.start_minute == null ||
-      updatedProfileWorkedDay.end_hour == null ||
-      updatedProfileWorkedDay.end_minute == null
+      updatedProfileWorkedDay.startHour == null ||
+      updatedProfileWorkedDay.startMin == null ||
+      updatedProfileWorkedDay.endHour == null ||
+      updatedProfileWorkedDay.endMin == null
     ) {
       return NextResponse.json(
         { error: "Fallo multiorganico" },
@@ -263,12 +298,13 @@ export async function PUT(req: Request) {
         updatedProfileWorkedDay.date.getMonth() + 1,
         updatedProfileWorkedDay.date.getDate())
       ),
-      startHour: updatedProfileWorkedDay.start_hour,
-      startMin: updatedProfileWorkedDay.start_minute,
-      endHour: updatedProfileWorkedDay.end_hour,
-      endMin: updatedProfileWorkedDay.end_minute,
+      startHour: updatedProfileWorkedDay.startHour,
+      startMin: updatedProfileWorkedDay.startMin,
+      endHour: updatedProfileWorkedDay.endHour,
+      endMin: updatedProfileWorkedDay.endMin,
       break: updatedProfileWorkedDay.break === 1,
       sunday: updatedProfileWorkedDay.sunday === 1,
+      holiday: updatedProfileWorkedDay.holiday === 1,
     };
 
     //Calculate new hour differences
@@ -293,6 +329,7 @@ export async function PUT(req: Request) {
       data: newTypeHours,
     });
 
+    console.log(updatedProfileWorkedDay, "Updated");
     // Response
     return NextResponse.json(updatedProfileWorkedDay);
   } catch (error) {
@@ -305,7 +342,6 @@ export async function PUT(req: Request) {
 }
 
 /** Delete */
-
 export async function DELETE(req: Request) {
   try {
     // Get request data
@@ -356,7 +392,6 @@ export async function DELETE(req: Request) {
       }),
     ]);
 
-    console.log(transaction)
     // Respond with the created profile
     return NextResponse.json("newProfileWorkedDay");
   } catch (error) {
