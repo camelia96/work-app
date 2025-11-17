@@ -1,5 +1,4 @@
 // pages/api/getData.ts
-import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 const prisma = new PrismaClient();
@@ -31,6 +30,6 @@ export async function GET(req: Request) {
 
     return NextResponse.json(workedDays);
   } catch (error) {
-    return NextResponse.json({ error: "Error 2" });
+    return NextResponse.json({ error: "Error" + error });
   }
 }

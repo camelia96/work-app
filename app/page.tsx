@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { DateObject } from "react-multi-date-picker"
 import { Calendar } from "react-multi-date-picker"
-import dayjs, { Dayjs } from "dayjs";
-import { Button, Dropdown, Flex, InputNumber, InputNumberProps, MenuProps, Radio, Select, Spin, Table, TimePicker } from 'antd';
+import dayjs from "dayjs";
+import { Button, Dropdown, Flex, InputNumber, InputNumberProps, MenuProps, Radio, Select, Spin, TimePicker } from 'antd';
 import Checkbox, { CheckboxChangeEvent } from "antd/es/checkbox";
 import { DateTime, DefaultHour, OptionsGroup, Profile } from "@/types/myTypes";
 import { CalendarTwoTone, ClockCircleTwoTone, FrownTwoTone } from '@ant-design/icons';
@@ -86,7 +86,7 @@ export default function Home() {
   const [totalSalary, setTotalSalary] = useState<number>(0);
 
   /* First payroll date - From where we begin to count every 4 weeks */
-  const [firstPayrollDate, setFirstPayrollDate] = useState<DateObject>(new DateObject().setDay(13).setMonth(6).setYear(2024));
+  const [firstPayrollDate] = useState<DateObject>(new DateObject().setDay(13).setMonth(6).setYear(2024));
 
   /* Total months from first payroll date */
   const [totalMonthsPayroll, setTotalMonthsPayroll] = useState<number>(calculateTotalMonthsPayroll(currentMonth, firstPayrollDate));
@@ -119,8 +119,8 @@ export default function Home() {
     // Populate menu dropdown with all year's payroll dates
     /** We fill the array 13 times instead of 12 because a month is only 28 days */
     for (let i = newYearFirstTotalMonthsPayroll; i <= newYearFirstTotalMonthsPayroll + 13; i++) {
-      let newFirstPayrollDay = calculateFirstDayCurrentPayroll(firstPayrollDate, i);
-      let newLastPayrollDay = calculateLastDayCurrentPayroll(newFirstPayrollDay);
+      const newFirstPayrollDay = calculateFirstDayCurrentPayroll(firstPayrollDate, i);
+      const newLastPayrollDay = calculateLastDayCurrentPayroll(newFirstPayrollDay);
 
       items.push({ label: `${newFirstPayrollDay.month.name} - ${newFirstPayrollDay.format("DD/MM/YYYY")} to ${newLastPayrollDay.format("DD/MM/YYYY")}`, key: i })
     }
@@ -158,7 +158,6 @@ export default function Home() {
   };
 
 
-
   // Get current payroll dates 
   const fetchProfileWorkedDays = async (firstDay: DateObject, lastDay: DateObject) => {
     setIsLoading(true);
@@ -168,6 +167,7 @@ export default function Home() {
       const res = await fetch(`/api/profileWorkedDays?profile=${selectedTabProfile}&firstDay=${firstDay}&lastDay=${lastDay}`);
       const data = await res.json();
 
+      console.log(data)
 
       // Map data from database
       const newProfileWorkedDays = data.map((profileWorkedDay: { id: number, profile_id: number, worked_day_id: number, worked_days: DateTime }) => {
@@ -335,7 +335,7 @@ export default function Home() {
       setSunday(isSunday)
 
       // New work day that we will either create or delete 
-      let newWorkDay = { profile: selectedTabProfile, date: prismaFormatDate(dateClicked), startHour: selectedDefaultHour.startHour, startMin: selectedDefaultHour.startMin, endHour: selectedDefaultHour.endHour, endMin: selectedDefaultHour.endMin, break: breakExists, sunday: isSunday, holiday: false }
+      const newWorkDay = { profile: selectedTabProfile, date: prismaFormatDate(dateClicked), startHour: selectedDefaultHour.startHour, startMin: selectedDefaultHour.startMin, endHour: selectedDefaultHour.endHour, endMin: selectedDefaultHour.endMin, break: breakExists, sunday: isSunday, holiday: false }
 
       //If focused and clicked dates don't match, it's deleted
       if (dateFocusedFormat != dateClickedFormat) {
@@ -500,7 +500,6 @@ export default function Home() {
     const fetchTypeHours = async () => {
       try {
         const res = await fetch('/api/typeHours');
-        const data = await res.json();
 
       } catch (error) {
         console.error("Error:", error);
