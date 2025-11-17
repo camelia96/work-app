@@ -1,5 +1,4 @@
 // pages/api/getData.ts
-import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient } from '@prisma/client'
 import { NextResponse } from "next/server";
 const prisma = new PrismaClient();
@@ -10,6 +9,6 @@ export async function GET() {
       const profiles = await prisma.profiles.findMany();
       return NextResponse.json(profiles);
     } catch (error) {
-      return NextResponse.json({ error: "Error" });
+      return NextResponse.json({ error: "Error" + error });
     }
 }

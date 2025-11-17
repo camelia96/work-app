@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgres"
   url      = env("DATABASE_URL")
 }
 
@@ -60,9 +60,9 @@ model worked_days {
   startMin            String?               @db.VarChar(45)
   endHour             String?               @db.VarChar(45)
   endMin              String?               @db.VarChar(45)
-  break               Int?                  @db.TinyInt
-  sunday              Int?                  @db.TinyInt
-  holiday             Int?                  @db.TinyInt
+  break               Int?                  @db.Integer
+  sunday              Int?                  @db.Integer
+  holiday             Int?                  @db.Integer
   hours_worked_days   hours_worked_days[]
   profile_worked_days profile_worked_days[]
 }
@@ -70,11 +70,11 @@ model worked_days {
 model monthly_salary {
   id           Int       @id @default(autoincrement())
   profile_id   Int?
-  base_salary  Float?    @db.Float
+  base_salary  Float?    @db.DoublePrecision
   month        Int?
-  month_tips   Float?    @db.Float
-  month_salary Float?    @db.Float
-  total_hours  Float?    @db.Float
+  month_tips   Float?    @db.DoublePrecision
+  month_salary Float?    @db.DoublePrecision
+  total_hours  Float?    @db.DoublePrecision
   profiles     profiles? @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_monthly_salary_profiles")
 
   @@index([profile_id], map: "fk_monthly_salary_profiles_idx")

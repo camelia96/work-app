@@ -1,5 +1,4 @@
 // pages/api/getData.ts
-import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { DateTime } from "@/types/myTypes";
@@ -199,9 +198,9 @@ export async function POST(req: Request) {
       diffHours,
       workedDayId
     );
-    const hoursWorkedDays = await prisma.hours_worked_days.createMany({
+    /*const hoursWorkedDays = await prisma.hours_worked_days.createMany({
       data: differentWorkedHours,
-    });
+    });*/
 
     const newWorkedDayId = newProfileWorkedDay.worked_days?.id;
     if (!newWorkedDayId)
@@ -215,7 +214,7 @@ export async function POST(req: Request) {
         id: newWorkedDayId,
       },
     });
-
+console.log(newWorkedDay)
     // Respond with the created profile
     return NextResponse.json(newWorkedDay);
   } catch (error) {
@@ -318,18 +317,17 @@ export async function PUT(req: Request) {
     );
 
     //Delete old records from hours_worked_days for selected worked_day
-    const oldHoursWorkedDays = await prisma.hours_worked_days.deleteMany({
+    /*const oldHoursWorkedDays = await prisma.hours_worked_days.deleteMany({
       where: {
         worked_day_id: updatedProfileWorkedDay.id,
       },
-    });
+    });*/
 
     //Create new records from hours_worked_days for selected worked_day
-    const newHoursWorkedDays = await prisma.hours_worked_days.createMany({
+    /*const newHoursWorkedDays = await prisma.hours_worked_days.createMany({
       data: newTypeHours,
-    });
+    });*/
 
-    console.log(updatedProfileWorkedDay, "Updated");
     // Response
     return NextResponse.json(updatedProfileWorkedDay);
   } catch (error) {
@@ -374,7 +372,7 @@ export async function DELETE(req: Request) {
       );
     }
 
-    const transaction = await prisma.$transaction([
+    /*const transaction = await prisma.$transaction([
       prisma.profile_worked_days.deleteMany({
         where: {
           worked_day_id: workedDayToDelete.worked_day_id,
@@ -390,7 +388,7 @@ export async function DELETE(req: Request) {
           id: workedDayToDelete.worked_day_id,
         },
       }),
-    ]);
+    ]);*/
 
     // Respond with the created profile
     return NextResponse.json("newProfileWorkedDay");
