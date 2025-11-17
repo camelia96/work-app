@@ -11,8 +11,3 @@ This refactor focuses on creating a cleaner, more maintainable, and modern versi
 
 ## Contributing
 This project is a work in progress, but contributions are welcome! Feel free to fork the repository, submit issues, or make pull requests.
-
-
-
-## Contributing
-This project is a work in progress, but contributions are welcome! Feel free to fork the repository, submit issues, or make pull requests.
