@@ -599,46 +599,46 @@ export default function Home() {
 
 
           {/** PROFILES */}
-          <div className="w-full xl:w-3/12 ">
+          {/* <div className="w-full xl:w-3/12 ">
             <p className=" text-sm text-left">Choose a profile</p>
             <Flex vertical gap="middle">
               <Radio.Group block options={profiles.map((profile) => { return { label: profile.name, value: profile.id } })} optionType="button" onChange={handleSelectedTabProfile} value={selectedTabProfile} />
             </Flex>
-          </div>
+          </div> */}
           {/** PAYROLL DROPDOWN */}
-          <div className="flex flex-col w-full xl:w-3/12">
+          {/* <div className="flex flex-col w-full xl:w-3/12">
             <p className="text-left text-sm">Choose your 4 weeks payroll</p>
             <Dropdown menu={{ items, selectable: true, onClick: handleMenuClick }} trigger={['click']} className=" w-full" >
               <Button>
                 Payrolls
               </Button>
             </Dropdown>
-          </div>
+          </div> */}
 
 
-          <div className="w-full xl:w-3/12 flex flex-col items-start">
+          {/* <div className="w-full xl:w-3/12 flex flex-col items-start">
             <p className="text-left text-sm">Choose your shift hours</p>
             {/** SHIFT HOURS */}
-            <Select
+            {/* <Select
               className="w-full"
               onChange={handleDefaultHourChange}
-              options={defaultHoursGroup} defaultValue={String(defaultHourObject.id)} />
+              options={defaultHoursGroup} defaultValue={String(defaultHourObject.id)} /> */}
 
-          </div>
+          {/* </div>  */}
 
           <div className="flex flex-col items-center xl:items-start w-full xl:w-3/12">
             <div>
               {/** BREAKS */}
-              <Checkbox checked={breakExists} onChange={(e) => { setBreakExists(e.target.checked) }}><span className="">Is there a break in your shift?</span>
-              </Checkbox>
+              {/* <Checkbox checked={breakExists} onChange={(e) => { setBreakExists(e.target.checked) }}><span className="">Is there a break in your shift?</span>
+              </Checkbox> */}
             </div>
 
 
             <div>
               {/** HOLIDAY*/}
-              <Checkbox
+              {/* <Checkbox
                 className="holiday-checkbox " checked={holidayMode} onChange={handleHolidayMode}><span className="">Change to Holiday mode</span>
-              </Checkbox>
+              </Checkbox> */}
             </div>
           </div>
         </div>
@@ -650,7 +650,7 @@ export default function Home() {
 
             <div className=" flex flex-col-reverse xl:flex-row gap-12 items-center xl:items-start">
               {/** CALENDAR */}
-              <Calendar
+               {/* <Calendar
                 disableMonthPicker={false}
                 multiple
                 value={dates.sort((a, b) => a.date.valueOf() - b.date.valueOf()).map(date => date.date)}
@@ -665,13 +665,13 @@ export default function Home() {
                 onYearChange={handleYearCalendarChange}
                 buttons={true}
                 mapDays={({ date }) => {
-                  /* Holiday days color */
+                  // Holiday days color
                   let color;
                   const holidayDays = dates.filter(value => value.holiday).map(value => value.date.day);
 
                   if (holidayDays.includes(date.day)) color = "green";
 
-                  /* Grey days color */
+                  // Grey days color
                   const newFirstDay = new DateObject(firstDayCurrentPayroll)
                   const newLastDay = new DateObject(lastDayCurrentPayroll)
 
@@ -683,7 +683,7 @@ export default function Home() {
                   }
                   if (color) return { className: "highlight highlight-" + color };
                 }}
-              />
+              />  */}
 
 
               <div className="flex flex-col w-full">
@@ -694,9 +694,9 @@ export default function Home() {
                     <div className="flex flex-col items-center xl:items-start w-full">
                       <p className=" xl:hidden font-semibold">Hours</p>
                       <div className="flex gap-2 flex-col md:flex-row">
-                        <p>Total  <span className="text-blue font-bold">{workedHours} hours</span> /</p>
+                        {/* <p>Total  <span className="text-blue font-bold">{workedHours} hours</span> /</p>
                         <p>Morning  <span className="text-blue font-bold">{morningHours} hours</span> /</p>
-                        <p>Sunday  <span className="text-blue font-bold">{sundayHours} hours</span></p>
+                        <p>Sunday  <span className="text-blue font-bold">{sundayHours} hours</span></p> */}
                       </div>
                     </div>
                     <div className="flex flex-col items-center gap-2">
@@ -706,14 +706,14 @@ export default function Home() {
                         <p><span className="text-blue font-bold">{baseSalary}€</span>  </p>
                         <p className="m-0">+</p>
                         <span>Tips</span>
-                        <InputNumber
+                        {/* <InputNumber
                           <number>
                           style={{ width: "3/12" }}
                           defaultValue={0}
                           min={0}
                           step="0.01"
-                          onChange={handleTipChange} /> =
-                        <p><span className="text-blue  bg-blueHover font-bold px-2 py-1 rounded-lg">{totalSalary}€</span></p>
+                          onChange={handleTipChange} /> = 
+                        <p><span className="text-blue  bg-blueHover font-bold px-2 py-1 rounded-lg">{totalSalary}€</span></p>*/}
                       </div>
                     </div>
 
@@ -722,7 +722,7 @@ export default function Home() {
                 {/** Working days for curreny payroll */}
                 <p className="font-semibold mt-4 mb-2 w-full text-center xl:text-left">Worked days for current payroll</p>
                 <div className="text-center sm:text-left md:px-10 lg:px-32 xl:px-0 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-3 2xl:grid-cols-4 w-full  ">
-                  {dates.length > 0 ?
+                  {/* {dates.length > 0 ?
                     dates.map((date, index) => editingIndexes.includes(index) ?
                       (<div key={index} className="flex flex-col items-center gap-2 border-b-2 p-4 text-sm " >
                         <p className="font-bold"><CalendarTwoTone className=" mr-2" />{date.date.format("DD MMM YYYY")}</p>
@@ -740,7 +740,7 @@ export default function Home() {
                         <p className=""><ClockCircleTwoTone twoToneColor={date.holiday ? "#009688" : ""} className=" mr-2" />{`${dayjs().hour(parseInt(date.startHour)).minute(parseInt(date.startMin)).format("HH:mm")} to ${dayjs().hour(parseInt(date.endHour)).minute(parseInt(date.endMin)).format("HH:mm")}`}</p>
                         <p className={`font-semibold text-${date.holiday ? `green` : `blue`}`}>{`${date.break ? "w/break" : "No break"}`}</p>
                       </div>)) : (<div><FrownTwoTone /> No data for this payroll</div>)
-                  }
+                  } */}
                 </div>
               </div>
 
