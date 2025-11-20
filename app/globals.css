@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   --background: #ffffff;
@@ -12,13 +10,17 @@
 }
 
 
+@variant sm (min-width: 640px);
+@variant md (min-width: 768px);
+@variant lg (min-width: 1024px);
+@variant xl (min-width: 1280px);
 
-/*@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}*/
+}
 
 body {
   color: var(--foreground);
@@ -26,11 +28,11 @@ body {
   font-family: var(--font-figtree);
 }
 
-/* antdesign checkbox */
+ /* antdesign checkbox */
 .holiday-checkbox:hover .ant-checkbox-inner {
-  border-color: var(--green)!important
+  border-color: var(--green)
 }
-
+ 
 
 .holiday-checkbox .ant-checkbox-checked .ant-checkbox-inner {
   background-color: var(--green);
@@ -38,21 +40,21 @@ body {
 }
 
 .holiday-checkbox:hover .ant-checkbox-checked .ant-checkbox-inner {
-  background-color: var(--green-hover)!important;
-  border-color: var(--green-hover)!important;
+  background-color: var(--green-hover);
+  border-color: var(--green-hover)
 }
 
-/* Calendar responsive *//*
+/* Calendar responsive */
 .rmdp-wrapper{
-  @apply w-max sm:w-full !important
+  @apply w-max sm:w-full 
 }
 .rmdp-calendar {
-  @apply w-full !important;
-}*/
+  @apply w-full 
+}
 .rmdp-top-class {
   @apply w-max
 }
 .rmdp-full-year {
-  @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3 !important
+  @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3 
 }
 
