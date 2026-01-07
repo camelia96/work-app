@@ -1,10 +1,11 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+  url = env("DATABASE_URL")
 }
 
 model default_hours {
@@ -28,6 +29,19 @@ model hours_worked_days {
 
   @@index([type_hours_id], map: "fk_type_hours_hours_worked_days_idx")
   @@index([worked_day_id], map: "fk_worked_days_hours_worked_days_idx")
+}
+
+model monthly_salary {
+  id           Int       @id @default(autoincrement())
+  profile_id   Int?
+  base_salary  Float?
+  month        Int?
+  month_tips   Float?
+  month_salary Float?
+  total_hours  Float?
+  profiles     profiles? @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_monthly_salary_profiles")
+
+  @@index([profile_id], map: "fk_monthly_salary_profiles_idx")
 }
 
 model profile_worked_days {
@@ -67,17 +81,4 @@ model worked_days {
   holiday             Int?
   hours_worked_days   hours_worked_days[]
   profile_worked_days profile_worked_days[]
-}
-
-model monthly_salary {
-  id           Int       @id @default(autoincrement())
-  profile_id   Int?
-  base_salary  Float?
-  month        Int?
-  month_tips   Float?
-  month_salary Float?
-  total_hours  Float?
-  profiles     profiles? @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_monthly_salary_profiles")
-
-  @@index([profile_id], map: "fk_monthly_salary_profiles_idx")
 }
