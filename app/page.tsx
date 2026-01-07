@@ -56,6 +56,10 @@ function calculateLastDayCurrentPayroll(firstDayCurrentPayroll: DateObject) {
 
 
 export default function Home() {
+  /* Statuses state */
+  const [warning, setWarning] = useState<{ warning: boolean, message: string }>();
+  const [error, setError] = useState<{ error: boolean, message: string }>();
+
   /* Profiles states */
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedTabProfile, setSelectedTabProfile] = useState<number>(defaultProfileId);
@@ -160,6 +164,7 @@ export default function Home() {
 
   // Get current payroll dates 
   const fetchProfileWorkedDays = async (firstDay: DateObject, lastDay: DateObject) => {
+
     setIsLoading(true);
     try {
 
@@ -168,6 +173,12 @@ export default function Home() {
       const data = await res.json();
 
       console.log(data)
+
+      if (data.length == 0) {
+        setWarning({ warning: true, message: "There are no worked days for the current profile" })
+      } else {
+        setWarning({ warning: false, message: "" })
+      }
 
       // Map data from database
       const newProfileWorkedDays = data.map((profileWorkedDay: { id: number, profile_id: number, worked_day_id: number, worked_days: DateTime }) => {
@@ -190,10 +201,12 @@ export default function Home() {
       // Set data
       setDates(newProfileWorkedDays)
       setIsLoading(false)
-
+      setError({ error: false, message: '' });
 
     } catch (error) {
       setIsLoading(false)
+
+      setError({ error: true, message: "" });
       // Handle error
       console.error("Error: no vaaa", error);
     }
@@ -217,7 +230,7 @@ export default function Home() {
 
     // Get and set salary states
     const hoursSalary = await res.json();
-
+console.log(hoursSalary)
     setWorkedHours(hoursSalary.workedHours)
     setMorningHours(hoursSalary.morningWorkedHours)
     setSundayHours(hoursSalary.sundaysWorkedHours)
@@ -511,7 +524,9 @@ export default function Home() {
         const res = await fetch('/api/profiles');
         const data = await res.json();
         setProfiles(data)
+        setError({ error: false, message: "" })
       } catch (error) {
+        setError({ error: true, message: "There's a problem with the profiles" })
         console.error("Error: no va", error);
       }
     }
@@ -585,60 +600,62 @@ export default function Home() {
     fetchHoursSalary()
   }, [firstDayCurrentPayroll])
 
-
+console.log(totalSalary)
+console.log(workedHours)
 
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 xl:py-10 max-w-full ">
-      <div className="w-full 2xl:w-[95rem] text-center justify-center flex flex-col gap-10 items-center px-10 xl:px-20">
+      <div className="w-full 2xl:w-380 text-center justify-center flex flex-col gap-10 items-center px-10 xl:px-20">
 
         {/** TITLE */}
         <p className="text-3xl font-semibold">Worked Hours</p>
-
+        {error ? (<span className="inline-flex items-center rounded-md bg-red-400/10 px-2 py-1 text-xs font-medium text-red-400 inset-ring inset-ring-red-400/20">{error.message}</span>) : (<></>)}
+        {warning ? (<span className="inline-flex items-center rounded-md bg-yellow-400/10 px-2 py-1 text-xs font-medium text-yellow-500 inset-ring inset-ring-yellow-400/20">{warning.message}</span>) : (<></>)}
         {/** PROPS */}
         <div className="flex flex-col xl:flex-row xl:items-end items-center xl:text-left text-center justify-center gap-6 w-full">
 
 
           {/** PROFILES */}
-          {/* <div className="w-full xl:w-3/12 ">
+          {<div className="w-full xl:w-3/12 ">
             <p className=" text-sm text-left">Choose a profile</p>
             <Flex vertical gap="middle">
-              <Radio.Group block options={profiles.map((profile) => { return { label: profile.name, value: profile.id } })} optionType="button" onChange={handleSelectedTabProfile} value={selectedTabProfile} />
+              <Radio.Group disabled={profiles.length == 0 ? true : false} block options={profiles.length > 0 ? profiles.map((profile) => { return { label: profile.name, value: profile.id } }) : [{ label: "No profiles available", value: 0 }]} optionType="button" onChange={handleSelectedTabProfile} value={selectedTabProfile} />
             </Flex>
-          </div> */}
+          </div>}
           {/** PAYROLL DROPDOWN */}
-          {/* <div className="flex flex-col w-full xl:w-3/12">
+          {<div className="flex flex-col w-full xl:w-3/12">
             <p className="text-left text-sm">Choose your 4 weeks payroll</p>
             <Dropdown menu={{ items, selectable: true, onClick: handleMenuClick }} trigger={['click']} className=" w-full" >
               <Button>
                 Payrolls
               </Button>
             </Dropdown>
-          </div> */}
+          </div>}
 
 
-          {/* <div className="w-full xl:w-3/12 flex flex-col items-start">
+          <div className="w-full xl:w-3/12 flex flex-col items-start">
             <p className="text-left text-sm">Choose your shift hours</p>
             {/** SHIFT HOURS */}
-            {/* <Select
+            {<Select
               className="w-full"
               onChange={handleDefaultHourChange}
-              options={defaultHoursGroup} defaultValue={String(defaultHourObject.id)} /> */}
+              options={defaultHoursGroup} defaultValue={String(defaultHourObject.id)} />}
 
-          {/* </div>  */}
+          </div>
 
           <div className="flex flex-col items-center xl:items-start w-full xl:w-3/12">
             <div>
               {/** BREAKS */}
-              {/* <Checkbox checked={breakExists} onChange={(e) => { setBreakExists(e.target.checked) }}><span className="">Is there a break in your shift?</span>
-              </Checkbox> */}
+               {<Checkbox checked={breakExists} onChange={(e) => { setBreakExists(e.target.checked) }}><span className="">Is there a break in your shift?</span>
+              </Checkbox> }
             </div>
 
 
             <div>
               {/** HOLIDAY*/}
-              {/* <Checkbox
+              { <Checkbox
                 className="holiday-checkbox " checked={holidayMode} onChange={handleHolidayMode}><span className="">Change to Holiday mode</span>
-              </Checkbox> */}
+              </Checkbox> }
             </div>
           </div>
         </div>
@@ -650,7 +667,7 @@ export default function Home() {
 
             <div className=" flex flex-col-reverse xl:flex-row gap-12 items-center xl:items-start">
               {/** CALENDAR */}
-               {/* <Calendar
+              <Calendar
                 disableMonthPicker={false}
                 multiple
                 value={dates.sort((a, b) => a.date.valueOf() - b.date.valueOf()).map(date => date.date)}
@@ -683,7 +700,7 @@ export default function Home() {
                   }
                   if (color) return { className: "highlight highlight-" + color };
                 }}
-              />  */}
+              /> 
 
 
               <div className="flex flex-col w-full">
@@ -694,9 +711,9 @@ export default function Home() {
                     <div className="flex flex-col items-center xl:items-start w-full">
                       <p className=" xl:hidden font-semibold">Hours</p>
                       <div className="flex gap-2 flex-col md:flex-row">
-                        {/* <p>Total  <span className="text-blue font-bold">{workedHours} hours</span> /</p>
+                        <p>Total  <span className="text-blue font-bold">{workedHours} hours</span> /</p>
                         <p>Morning  <span className="text-blue font-bold">{morningHours} hours</span> /</p>
-                        <p>Sunday  <span className="text-blue font-bold">{sundayHours} hours</span></p> */}
+                        <p>Sunday  <span className="text-blue font-bold">{sundayHours} hours</span></p>
                       </div>
                     </div>
                     <div className="flex flex-col items-center gap-2">
@@ -706,14 +723,14 @@ export default function Home() {
                         <p><span className="text-blue font-bold">{baseSalary}€</span>  </p>
                         <p className="m-0">+</p>
                         <span>Tips</span>
-                        {/* <InputNumber
+                        <InputNumber
                           <number>
                           style={{ width: "3/12" }}
                           defaultValue={0}
                           min={0}
                           step="0.01"
                           onChange={handleTipChange} /> = 
-                        <p><span className="text-blue  bg-blueHover font-bold px-2 py-1 rounded-lg">{totalSalary}€</span></p>*/}
+                        <p><span className="text-blue  bg-blueHover font-bold px-2 py-1 rounded-lg">{totalSalary}€</span></p>
                       </div>
                     </div>
 
@@ -722,7 +739,7 @@ export default function Home() {
                 {/** Working days for curreny payroll */}
                 <p className="font-semibold mt-4 mb-2 w-full text-center xl:text-left">Worked days for current payroll</p>
                 <div className="text-center sm:text-left md:px-10 lg:px-32 xl:px-0 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-3 2xl:grid-cols-4 w-full  ">
-                  {/* {dates.length > 0 ?
+                  {dates.length > 0 ?
                     dates.map((date, index) => editingIndexes.includes(index) ?
                       (<div key={index} className="flex flex-col items-center gap-2 border-b-2 p-4 text-sm " >
                         <p className="font-bold"><CalendarTwoTone className=" mr-2" />{date.date.format("DD MMM YYYY")}</p>
@@ -740,7 +757,7 @@ export default function Home() {
                         <p className=""><ClockCircleTwoTone twoToneColor={date.holiday ? "#009688" : ""} className=" mr-2" />{`${dayjs().hour(parseInt(date.startHour)).minute(parseInt(date.startMin)).format("HH:mm")} to ${dayjs().hour(parseInt(date.endHour)).minute(parseInt(date.endMin)).format("HH:mm")}`}</p>
                         <p className={`font-semibold text-${date.holiday ? `green` : `blue`}`}>{`${date.break ? "w/break" : "No break"}`}</p>
                       </div>)) : (<div><FrownTwoTone /> No data for this payroll</div>)
-                  } */}
+                  }
                 </div>
               </div>
 

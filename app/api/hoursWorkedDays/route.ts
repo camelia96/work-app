@@ -1,9 +1,8 @@
 // pages/api/getData.ts
-import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import Decimal from "decimal.js";
+import { prisma } from "@/lib/prisma";;
 
-const prisma = new PrismaClient();
 
 /** Read */
 export async function GET(req: Request) {

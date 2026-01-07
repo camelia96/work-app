@@ -1,10 +1,10 @@
 // pages/api/getData.ts
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";;
 import { NextResponse } from "next/server";
 import { DateTime } from "@/types/myTypes";
 import { DateObject } from "react-multi-date-picker";
 
-const prisma = new PrismaClient();
+
 
 const limitMorningHour = 7;
 const limitMorningMinute = 0;
@@ -109,7 +109,7 @@ export async function GET(req: Request) {
     const parsedFirstDayCurrentPayroll = new Date(firstDayCurrentPayroll);
     const parsedLastDayCurrentPayroll = new Date(lastDayCurrentPayroll);
 
-    console.log(parsedFirstDayCurrentPayroll);
+    //console.log(parsedFirstDayCurrentPayroll);
     const profileWorkedDays = await prisma.profile_worked_days.findMany({
       include: { worked_days: true },
       where: {
@@ -123,13 +123,13 @@ export async function GET(req: Request) {
         },
       },
     });
-
+/*
     console.log(firstDayCurrentPayroll);
-    console.log(lastDayCurrentPayroll);
+    console.log(lastDayCurrentPayroll);*/
     return NextResponse.json(profileWorkedDays);
   } catch (error) {
-    console.log(error);
-    return NextResponse.json({ error: "Error2" });
+    console.log(error)
+    return NextResponse.json({ error: error});
   }
 }
 
