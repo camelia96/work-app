@@ -8,6 +8,7 @@ import { DateTime, DefaultHour, OptionsGroup, Profile } from "@/lib/types";
 import { CalendarTwoTone, ClockCircleTwoTone, FrownTwoTone } from '@ant-design/icons';
 import { prisma } from "@/lib/prisma";
 import DatesList from "@/components/DatesList";
+import Profiles from "@/components/Profiles";
 
 
 
@@ -24,7 +25,7 @@ export default async function Home() {
         some: {
           profile_id: profile.id
         },
-        
+
 
       }
     },
@@ -37,7 +38,6 @@ export default async function Home() {
 
   /* Profiles states */
   /* const [profiles, setProfiles] = useState<Profile[]>([]);
-    const [selectedTabProfile, setSelectedTabProfile] = useState<number>(defaultProfileId);
   
     /* List of current payroll dates + other dates states */
   /* const [dates, setDates] = useState<DateTime[]>([])
@@ -221,10 +221,7 @@ export default async function Home() {
   
     }
   
-    // Selected profile
-    const handleSelectedTabProfile = (e: CheckboxChangeEvent) => {
-      setSelectedTabProfile(e.target.value);
-    };
+    
   
     // Tip handling
     const handleTipChange: InputNumberProps['onChange'] = (value) => {
@@ -579,19 +576,16 @@ export default async function Home() {
 
         {/** TITLE */}
         <p className="text-3xl font-semibold">Worked Hours</p>
+
+        <Profiles profiles={profiles}/>
         {/*  {error ? (<span className="inline-flex items-center rounded-md bg-red-400/10 px-2 py-1 text-xs font-medium text-red-400 inset-ring inset-ring-red-400/20">{error.message}</span>) : (<></>)}
         {warning ? (<span className="inline-flex items-center rounded-md bg-yellow-400/10 px-2 py-1 text-xs font-medium text-yellow-500 inset-ring inset-ring-yellow-400/20">{warning.message}</span>) : (<></>)}
         {/** PROPS */}
         {/*} <div className="flex flex-col xl:flex-row xl:items-end items-center xl:text-left text-center justify-center gap-6 w-full">
 
 
-          {/** PROFILES */}
-        {/*{<div className="w-full xl:w-3/12 ">
-            <p className=" text-sm text-left">Choose a profile</p>
-            <Flex vertical gap="middle">
-              <Radio.Group disabled={profiles.length == 0 ? true : false} block options={profiles.length > 0 ? profiles.map((profile) => { return { label: profile.name, value: profile.id } }) : [{ label: "No profiles available", value: 0 }]} optionType="button" onChange={handleSelectedTabProfile} value={selectedTabProfile} />
-            </Flex>
-          </div>}
+
+        
           {/** PAYROLL DROPDOWN */}
         {/*   {<div className="flex flex-col w-full xl:w-3/12">
             <p className="text-left text-sm">Choose your 4 weeks payroll</p>
@@ -707,7 +701,7 @@ export default async function Home() {
                   </div>
                 </div>
                 {/** Working days for curreny payroll */}
-                <DatesList dates={workedDays}/>
+        <DatesList dates={workedDays} />
         {/*        <p className="font-semibold mt-4 mb-2 w-full text-center xl:text-left">Worked days for current payroll</p>
                 <div className="text-center sm:text-left md:px-10 lg:px-32 xl:px-0 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-3 2xl:grid-cols-4 w-full  ">
                   {dates.length > 0 ?
