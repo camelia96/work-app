@@ -1,16 +1,36 @@
-"use client"
 import { useEffect, useState } from "react";
 import { DateObject } from "react-multi-date-picker"
 import { Calendar } from "react-multi-date-picker"
 import dayjs from "dayjs";
 import { Button, Dropdown, Flex, InputNumber, InputNumberProps, MenuProps, Radio, Select, Spin, TimePicker } from 'antd';
 import Checkbox, { CheckboxChangeEvent } from "antd/es/checkbox";
-import { DateTime, DefaultHour, OptionsGroup, Profile } from "@/types/myTypes";
+import { DateTime, DefaultHour, OptionsGroup, Profile } from "@/lib/types";
 import { CalendarTwoTone, ClockCircleTwoTone, FrownTwoTone } from '@ant-design/icons';
+import { prisma } from "@/lib/prisma";
+import DatesList from "@/components/DatesList";
 
 
 
-export default function Home() {
+export default async function Home() {
+
+  const profiles = await prisma.profiles.findMany();
+  const defaultHours = await prisma.default_hours.findMany();
+
+  const profile = profiles[0];
+
+  const workedDays = await prisma.worked_days.findMany({
+    where: {
+      profile_worked_days: {
+        some: {
+          profile_id: profile.id
+        },
+        
+
+      }
+    },
+  })
+
+
   /* Statuses state */
   /*const [warning, setWarning] = useState<{ warning: boolean, message: string }>();
   const [error, setError] = useState<{ error: boolean, message: string }>();
@@ -21,7 +41,7 @@ export default function Home() {
   
     /* List of current payroll dates + other dates states */
   /* const [dates, setDates] = useState<DateTime[]>([])
-   const [editingIndexes, setEditingIndexes] = useState<number[]>([]);
+  
  
    /* Defaults states */
   /*  const [defaultHours, setDefaultHours] = useState<DefaultHour[]>([]);
@@ -390,10 +410,6 @@ export default function Home() {
     }
   
   
-    // Handle index array when editing
-    const handleEditingIndex = (index: number) => {
-      setEditingIndexes([...editingIndexes, index])
-    }
   
     // Handle start time for specific date change
     const handleStartTimeChange = (dateString: string | string[], index: number) => {
@@ -691,6 +707,7 @@ export default function Home() {
                   </div>
                 </div>
                 {/** Working days for curreny payroll */}
+                <DatesList dates={workedDays}/>
         {/*        <p className="font-semibold mt-4 mb-2 w-full text-center xl:text-left">Worked days for current payroll</p>
                 <div className="text-center sm:text-left md:px-10 lg:px-32 xl:px-0 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-3 2xl:grid-cols-4 w-full  ">
                   {dates.length > 0 ?
