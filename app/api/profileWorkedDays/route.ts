@@ -1,7 +1,7 @@
 // pages/api/getData.ts
 import { prisma } from "@/lib/prisma";;
 import { NextResponse } from "next/server";
-import { DateTime } from "@/types/myTypes";
+import { DateTime } from "@/lib/types/myTypes";
 import { DateObject } from "react-multi-date-picker";
 
 
