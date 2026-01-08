@@ -8,7 +8,9 @@ interface DatesListProps {
     dates: worked_days[]
 }
 
-
+function dateFormat(date: Date) {
+    return dayjs(date).format("DD/MM/YYYY")/* date.getDay() + "/" + date.getUTCDate() + "/" + date.getFullYear() */
+}
 export default function DatesList({ dates }: DatesListProps) {
     const [editingIndexes, setEditingIndexes] = useState<number[]>([]);
     // Handle index array when editing
@@ -27,7 +29,7 @@ export default function DatesList({ dates }: DatesListProps) {
                     editingIndexes.includes(i) ?
                         (<div key={i} className="text-sm flex flex-col border-b-2 px-1 py-6 hover:bg-blue-100 hover:cursor-pointer hover:transition-all hover:duration-200 " onClick={() => handleEditingIndex(i)}>
                             <p className="font-bold">
-                                <CalendarTwoTone twoToneColor={d.holiday ? "#009688" : ""} className=" mr-2 " /> {d.date.toLocaleDateString()}
+                                <CalendarTwoTone twoToneColor={d.holiday ? "#009688" : ""} className=" mr-2 " /> <span>{dateFormat(d.date)}</span>
                             </p>
                             <p className="">
                                 <ClockCircleTwoTone twoToneColor={d.holiday ? "#009688" : ""} className=" mr-2" />{`${dayjs().hour(parseInt(d.startHour!)).minute(parseInt(d.startMin!)).format("HH:mm")} to ${dayjs().hour(parseInt(d.endHour!)).minute(parseInt(d.endMin!)).format("HH:mm")}`}
@@ -36,7 +38,7 @@ export default function DatesList({ dates }: DatesListProps) {
                         </div>)
                         /** Edit date */
                         : <div key={i} className="text-sm flex flex-col border-b-2 px-1 py-6 hover:bg-blue-100 hover:cursor-pointer hover:transition-all hover:duration-200 " onClick={() => handleEditingIndex(i)}>
-                            <p className="font-bold"><CalendarTwoTone twoToneColor={d.holiday ? "#009688" : ""} className=" mr-2 " />{d.date.toLocaleDateString()}</p>
+                            <p className="font-bold"><CalendarTwoTone twoToneColor={d.holiday ? "#009688" : ""} className=" mr-2 " />{dateFormat(d.date)}</p>
                             <p className=""><ClockCircleTwoTone twoToneColor={d.holiday ? "#009688" : ""} className=" mr-2" />{`${dayjs().hour(parseInt(d.startHour)).minute(parseInt(d.startMin)).format("HH:mm")} to ${dayjs().hour(parseInt(d.endHour)).minute(parseInt(d.endMin)).format("HH:mm")}`}</p>
                             <p className={`font-semibold text-${d.holiday ? `green` : `blue`}`}>{`${d.break ? "w/break" : "No break"}`}</p>
                         </div>
