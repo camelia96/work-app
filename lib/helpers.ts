@@ -1,3 +1,4 @@
+import { MenuProps } from "antd";
 import { DateObject } from "react-multi-date-picker";
 
 // DateObject to prisma format date
@@ -44,4 +45,46 @@ export function calculateLastDayCurrentPayroll(
   firstDayCurrentPayroll: DateObject
 ) {
   return new DateObject(firstDayCurrentPayroll).add(28, "days");
+}
+
+// Fill payroll months dropdown
+export function fillMonthsPayrollDropdown(
+  items: MenuProps["items"],
+  year: DateObject
+) {
+  if (items == undefined) return false;
+
+  // Get January's changed year difference month from first payroll
+  const newYearFirstTotalMonthsPayroll = calculateTotalMonthsPayroll(
+    year,
+    new DateObject().setDay(13).setMonth(6).setYear(2024)
+  );
+
+  // Empty items array
+  items.splice(0, items.length);
+
+  // Populate menu dropdown with all year's payroll dates
+  // We fill the array 13 times instead of 12 because a month is only 28 days
+  for (
+    let i = newYearFirstTotalMonthsPayroll;
+    i <= newYearFirstTotalMonthsPayroll + 13;
+    i++
+  ) {
+    const newFirstPayrollDay = calculateFirstDayCurrentPayroll(
+      new DateObject().setDay(13).setMonth(6).setYear(2024),
+      i
+    );
+    const newLastPayrollDay =
+      calculateLastDayCurrentPayroll(newFirstPayrollDay);
+
+    items.push({
+      label: `${newFirstPayrollDay.month.name} - ${newFirstPayrollDay.format(
+        "DD/MM/YYYY"
+      )} to ${newLastPayrollDay.format("DD/MM/YYYY")}`,
+      key: i,
+    });
+  }
+
+  // Update menuprops items array
+  items = items;
 }
