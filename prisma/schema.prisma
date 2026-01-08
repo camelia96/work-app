@@ -5,25 +5,25 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model default_hours {
   id         Int       @id @default(autoincrement())
-  startHour  String?   @db.VarChar(45)
-  startMin   String?   @db.VarChar(45)
-  endHour    String?   @db.VarChar(45)
-  endMin     String?   @db.VarChar(45)
-  type_shift String?   @db.VarChar(45)
-  start_time DateTime? @db.Time(6)
-  end_time   DateTime? @db.Time(6)
+  startHour  String   @db.VarChar(45)
+  startMin   String   @db.VarChar(45)
+  endHour    String   @db.VarChar(45)
+  endMin     String   @db.VarChar(45)
+  type_shift String   @db.VarChar(45)
+  start_time DateTime @db.Time(6)
+  end_time   DateTime @db.Time(6)
 }
 
 model hours_worked_days {
   id            Int          @id @default(autoincrement())
-  worked_day_id Int?
-  hours         Float?
-  type_hours_id Int?
+  worked_day_id Int
+  hours         Float
+  type_hours_id Int
   type_hours    type_hours?  @relation(fields: [type_hours_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_type_hours_hours_worked_days")
   worked_days   worked_days? @relation(fields: [worked_day_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_worked_days_hours_worked_days")
 
@@ -33,9 +33,9 @@ model hours_worked_days {
 
 model monthly_salary {
   id           Int       @id @default(autoincrement())
-  profile_id   Int?
-  base_salary  Float?
-  month        Int?
+  profile_id   Int
+  base_salary  Float
+  month        Int
   month_tips   Float?
   month_salary Float?
   total_hours  Float?
@@ -46,8 +46,8 @@ model monthly_salary {
 
 model profile_worked_days {
   id            Int          @id @default(autoincrement())
-  worked_day_id Int?
-  profile_id    Int?
+  worked_day_id Int
+  profile_id    Int
   profiles      profiles?    @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_profiles_profile_worked_days")
   worked_days   worked_days? @relation(fields: [worked_day_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_worked_days_profile_worked_days")
 
@@ -57,26 +57,27 @@ model profile_worked_days {
 
 model profiles {
   id                  Int                   @id @default(autoincrement())
-  name                String?               @db.VarChar(100)
+  name                String                @db.VarChar(100)
+  email               String?               @db.VarChar(100)
   monthly_salary      monthly_salary[]
   profile_worked_days profile_worked_days[]
 }
 
 model type_hours {
   id                Int                 @id @default(autoincrement())
-  price             Decimal?            @db.Decimal(5, 2)
-  type              String?             @db.VarChar(45)
+  price             Decimal            @db.Decimal(5, 2)
+  type              String             @db.VarChar(45)
   hours_worked_days hours_worked_days[]
 }
 
 model worked_days {
   id                  Int                   @id @default(autoincrement())
-  date                DateTime?             @db.Date
-  startHour           String?               @db.VarChar(45)
-  startMin            String?               @db.VarChar(45)
-  endHour             String?               @db.VarChar(45)
-  endMin              String?               @db.VarChar(45)
-  break               Int?
+  date                DateTime              @db.Date
+  startHour           String                @db.VarChar(45)
+  startMin            String                @db.VarChar(45)
+  endHour             String                @db.VarChar(45)
+  endMin              String                @db.VarChar(45)
+  break               Int
   sunday              Int?
   holiday             Int?
   hours_worked_days   hours_worked_days[]
