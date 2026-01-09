@@ -33,6 +33,7 @@ export interface OptionsGroup {
 }
 
 export interface Options {
-  value: string;
+  key: number,
+  value: number;
   label: string;
 }
